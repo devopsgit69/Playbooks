@@ -1,0 +1,28 @@
+---
+- name: creating csv file for get the server details
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: find uptime
+      shell: uptime
+      register: up_time
+    - name: deploying the csv format
+      debug:
+        msg: "{{inventory_hostname}},{{ansible_os_family}},{{ansible_system}},{{ansible\
+                _distribution}},{{up_time.stdout.split(' . ')[0].split('up')[-1]}}"
+    - name: remove old csv file
+      file:
+        dest: ./Discovery.csv
+        state: absent
+    - name: create csv file
+      copy:
+        dest: ./Discovery.csv
+        content: |
+          server name, os family, os name, os distribution, uptime
+      delegate_to: all
+      run_once: true
+    - name: upload the details of server insid of csv file
+      lineinfile:
+        path: ./Discover.csv
+        line: "{{invetory_hostname}},{{ansible_os_family}},{{asible_system}},{{ansible_\
+                 distribution}},{{up_time.stdout.split(' . ')[0].split('up')[-1]}}"
